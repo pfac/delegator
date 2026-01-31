@@ -8,8 +8,20 @@ defmodule Delegator do
         {_, _, _} = target -> [target]
       end
 
+    only =
+      case Keyword.get(opts, :only) do
+        nil -> nil
+        funs -> MapSet.new(funs)
+      end
+
     for target <- targets do
-      functions = target |> Macro.expand(__CALLER__) |> Kernel.apply(:__info__, [:functions])
+      functions =
+        target
+        |> Macro.expand(__CALLER__)
+        |> Kernel.apply(:__info__, [:functions])
+        |> MapSet.new()
+        |> then(&if is_nil(only), do: &1, else: MapSet.intersection(&1, only))
+
       pos_ints = Stream.iterate(1, &(&1 + 1))
 
       for {fun_name, fun_arity} <- functions do

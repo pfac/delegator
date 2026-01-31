@@ -40,4 +40,30 @@ defmodule DelegatorTest do
     assert WrapAllOfMany.b(1, 2) == 3
     assert WrapAllOfMany.b(1, 2, 3) == 4
   end
+
+  defmodule WrapOnlyOfOne do
+    use Delegator, to: DelegatorTest.A, only: [a: 0]
+  end
+
+  test "delegates the functions listed in :only to a single module" do
+    assert WrapOnlyOfOne.a() == 1
+  end
+
+  test "does not delegate the functions not listed in :only to a single module" do
+    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfOne.a(1) end
+  end
+
+  defmodule WrapOnlyOfMany do
+    use Delegator, to: [DelegatorTest.A, DelegatorTest.B], only: [a: 0, b: 1]
+  end
+
+  test "delegates the functions listed in :only to multiple modules" do
+    assert WrapOnlyOfMany.a() == 1
+    assert WrapOnlyOfMany.b(1) == 2
+  end
+
+  test "does not delegate the functions not listed in :only to multiple modules" do
+    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfMany.a(1) end
+    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfMany.b() end
+  end
 end
