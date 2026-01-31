@@ -15,93 +15,201 @@ defmodule DelegatorTest do
     def b(_, _, _), do: 4
   end
 
-  defmodule WrapAllOfOne do
-    use Delegator, to: DelegatorTest.A
+  describe "delegate to a single module" do
+    defmodule DelegateAllToOne do
+      use Delegator, to: DelegatorTest.A
+    end
+
+    test "delegates all functions" do
+      assert DelegateAllToOne.a() == 1
+      assert DelegateAllToOne.a(1) == 2
+      assert DelegateAllToOne.a(1, 2) == 3
+      assert DelegateAllToOne.a(1, 2, 3) == 4
+    end
   end
 
-  test "delegates all functions to a single module" do
-    assert WrapAllOfOne.a() == 1
-    assert WrapAllOfOne.a(1) == 2
-    assert WrapAllOfOne.a(1, 2) == 3
-    assert WrapAllOfOne.a(1, 2, 3) == 4
+  describe "delegate to multiple modules" do
+    defmodule DelegateAllToMany do
+      use Delegator, to: [DelegatorTest.A, DelegatorTest.B]
+    end
+
+    test "delegates all functions" do
+      assert DelegateAllToMany.a() == 1
+      assert DelegateAllToMany.a(1) == 2
+      assert DelegateAllToMany.a(1, 2) == 3
+      assert DelegateAllToMany.a(1, 2, 3) == 4
+      assert DelegateAllToMany.b() == 1
+      assert DelegateAllToMany.b(1) == 2
+      assert DelegateAllToMany.b(1, 2) == 3
+      assert DelegateAllToMany.b(1, 2, 3) == 4
+    end
   end
 
-  defmodule WrapAllOfMany do
-    use Delegator, to: [DelegatorTest.A, DelegatorTest.B]
+  describe "with only: nil" do
+    defmodule DelegateWithNilOnly do
+      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], only: nil
+    end
+
+    test "delegates all functions" do
+      assert DelegateWithNilOnly.a() == 1
+      assert DelegateWithNilOnly.a(1) == 2
+      assert DelegateWithNilOnly.a(1, 2) == 3
+      assert DelegateWithNilOnly.a(1, 2, 3) == 4
+      assert DelegateWithNilOnly.b() == 1
+      assert DelegateWithNilOnly.b(1) == 2
+      assert DelegateWithNilOnly.b(1, 2) == 3
+      assert DelegateWithNilOnly.b(1, 2, 3) == 4
+    end
   end
 
-  test "delegates all functions to multiple modules" do
-    assert WrapAllOfMany.a() == 1
-    assert WrapAllOfMany.a(1) == 2
-    assert WrapAllOfMany.a(1, 2) == 3
-    assert WrapAllOfMany.a(1, 2, 3) == 4
-    assert WrapAllOfMany.b() == 1
-    assert WrapAllOfMany.b(1) == 2
-    assert WrapAllOfMany.b(1, 2) == 3
-    assert WrapAllOfMany.b(1, 2, 3) == 4
+  describe "with only: [a: 0, b: 1]" do
+    defmodule DelegateWithOnly do
+      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], only: [a: 0, b: 1]
+    end
+
+    test "delegates the functions listed in :only" do
+      assert DelegateWithOnly.a() == 1
+      assert DelegateWithOnly.b(1) == 2
+    end
+
+    test "does not delegate the functions not listed in :only" do
+      assert_raise UndefinedFunctionError, fn -> DelegateWithOnly.a(1) end
+      assert_raise UndefinedFunctionError, fn -> DelegateWithOnly.a(1, 2) end
+      assert_raise UndefinedFunctionError, fn -> DelegateWithOnly.a(1, 2, 3) end
+      assert_raise UndefinedFunctionError, fn -> DelegateWithOnly.b() end
+      assert_raise UndefinedFunctionError, fn -> DelegateWithOnly.b(1, 2) end
+      assert_raise UndefinedFunctionError, fn -> DelegateWithOnly.b(1, 2, 3) end
+    end
   end
 
-  defmodule WrapOnlyOfOne do
-    use Delegator, to: DelegatorTest.A, only: [a: 0]
+  describe "with only: []" do
+    defmodule DelegateWithEmptyOnly do
+      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], only: []
+    end
+
+    test "does not delegate the any functions" do
+      assert_raise UndefinedFunctionError, fn -> DelegateWithEmptyOnly.a() end
+      assert_raise UndefinedFunctionError, fn -> DelegateWithEmptyOnly.a(1) end
+      assert_raise UndefinedFunctionError, fn -> DelegateWithEmptyOnly.a(1, 2) end
+      assert_raise UndefinedFunctionError, fn -> DelegateWithEmptyOnly.a(1, 2, 3) end
+      assert_raise UndefinedFunctionError, fn -> DelegateWithEmptyOnly.b() end
+      assert_raise UndefinedFunctionError, fn -> DelegateWithEmptyOnly.b(1) end
+      assert_raise UndefinedFunctionError, fn -> DelegateWithEmptyOnly.b(1, 2) end
+      assert_raise UndefinedFunctionError, fn -> DelegateWithEmptyOnly.b(1, 2, 3) end
+    end
   end
 
-  test "delegates the functions listed in :only to a single module" do
-    assert WrapOnlyOfOne.a() == 1
+  describe "with except: nil" do
+    defmodule DelegateWithNilExcept do
+      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], except: nil
+    end
+
+    test "delegates all the functions" do
+      assert DelegateWithNilExcept.a() == 1
+      assert DelegateWithNilExcept.a(1) == 2
+      assert DelegateWithNilExcept.a(1, 2) == 3
+      assert DelegateWithNilExcept.a(1, 2, 3) == 4
+      assert DelegateWithNilExcept.b() == 1
+      assert DelegateWithNilExcept.b(1) == 2
+      assert DelegateWithNilExcept.b(1, 2) == 3
+      assert DelegateWithNilExcept.b(1, 2, 3) == 4
+    end
   end
 
-  test "does not delegate the functions not listed in :only to a single module" do
-    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfOne.a(1) end
-    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfOne.a(1, 2) end
-    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfOne.a(1, 2, 3) end
+  describe "with except: [a: 0, b: 1]" do
+    defmodule DelegateWithExcept do
+      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], except: [a: 0, b: 1]
+    end
+
+    test "delegates all the functions but the ones listed in :except" do
+      assert DelegateWithExcept.a(1) == 2
+      assert DelegateWithExcept.a(1, 2) == 3
+      assert DelegateWithExcept.a(1, 2, 3) == 4
+      assert DelegateWithExcept.b() == 1
+      assert DelegateWithExcept.b(1, 2) == 3
+      assert DelegateWithExcept.b(1, 2, 3) == 4
+    end
+
+    test "does not delegate the functions not listed in :except" do
+      assert_raise UndefinedFunctionError, fn -> DelegateWithExcept.a() end
+      assert_raise UndefinedFunctionError, fn -> DelegateWithExcept.b(1) end
+    end
   end
 
-  defmodule WrapOnlyOfMany do
-    use Delegator, to: [DelegatorTest.A, DelegatorTest.B], only: [a: 0, b: 1]
+  describe "with except: []" do
+    defmodule DelegateWithEmptyExcept do
+      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], except: []
+    end
+
+    test "delegates all the functions" do
+      assert DelegateWithEmptyExcept.a() == 1
+      assert DelegateWithEmptyExcept.a(1) == 2
+      assert DelegateWithEmptyExcept.a(1, 2) == 3
+      assert DelegateWithEmptyExcept.a(1, 2, 3) == 4
+      assert DelegateWithEmptyExcept.b() == 1
+      assert DelegateWithEmptyExcept.b(1) == 2
+      assert DelegateWithEmptyExcept.b(1, 2) == 3
+      assert DelegateWithEmptyExcept.b(1, 2, 3) == 4
+    end
   end
 
-  test "delegates the functions listed in :only to multiple modules" do
-    assert WrapOnlyOfMany.a() == 1
-    assert WrapOnlyOfMany.b(1) == 2
+  describe "with prefix: nil" do
+    defmodule DelegateWithNilPrefix do
+      use Delegator, to: DelegatorTest.A, prefix: nil
+    end
+
+    test "delegates all functions without any prefix" do
+      assert DelegateWithNilPrefix.a() == 1
+      assert DelegateWithNilPrefix.a(1) == 2
+      assert DelegateWithNilPrefix.a(1, 2) == 3
+      assert DelegateWithNilPrefix.a(1, 2, 3) == 4
+    end
   end
 
-  test "does not delegate the functions not listed in :only to multiple modules" do
-    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfOne.a(1) end
-    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfOne.a(1, 2) end
-    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfOne.a(1, 2, 3) end
-    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfOne.b() end
-    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfOne.b(1, 2) end
-    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfOne.b(1, 2, 3) end
+  describe "with prefix: :atom" do
+    defmodule DelegateWithAtomPrefix do
+      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], prefix: :prefix
+    end
+
+    test "delegates all functions prefixed" do
+      assert DelegateWithAtomPrefix.prefix_a() == 1
+      assert DelegateWithAtomPrefix.prefix_a(1) == 2
+      assert DelegateWithAtomPrefix.prefix_a(1, 2) == 3
+      assert DelegateWithAtomPrefix.prefix_a(1, 2, 3) == 4
+      assert DelegateWithAtomPrefix.prefix_b() == 1
+      assert DelegateWithAtomPrefix.prefix_b(1) == 2
+      assert DelegateWithAtomPrefix.prefix_b(1, 2) == 3
+      assert DelegateWithAtomPrefix.prefix_b(1, 2, 3) == 4
+    end
   end
 
-  defmodule WrapExceptOfOne do
-    use Delegator, to: DelegatorTest.A, except: [a: 0]
+  describe "with prefix: \"string\"" do
+    defmodule DelegateWithStringPrefix do
+      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], prefix: "prefix"
+    end
+
+    test "delegates all functions prefixed" do
+      assert DelegateWithStringPrefix.prefix_a() == 1
+      assert DelegateWithStringPrefix.prefix_a(1) == 2
+      assert DelegateWithStringPrefix.prefix_a(1, 2) == 3
+      assert DelegateWithStringPrefix.prefix_a(1, 2, 3) == 4
+      assert DelegateWithStringPrefix.prefix_b() == 1
+      assert DelegateWithStringPrefix.prefix_b(1) == 2
+      assert DelegateWithStringPrefix.prefix_b(1, 2) == 3
+      assert DelegateWithStringPrefix.prefix_b(1, 2, 3) == 4
+    end
   end
 
-  test "delegates all the functions but the ones listed in :except to a single module" do
-    assert WrapExceptOfOne.a(1) == 2
-    assert WrapExceptOfOne.a(1, 2) == 3
-    assert WrapExceptOfOne.a(1, 2, 3) == 4
-  end
+  describe "with prefix: \"\"" do
+    defmodule DelegateWithBlankPrefix do
+      use Delegator, to: DelegatorTest.A, prefix: ""
+    end
 
-  test "does not delegate the functions listed in :except to a single module" do
-    assert_raise UndefinedFunctionError, fn -> WrapExceptOfOne.a() end
-  end
-
-  defmodule WrapExceptOfMany do
-    use Delegator, to: [DelegatorTest.A, DelegatorTest.B], except: [a: 0, b: 1]
-  end
-
-  test "delegates all the functions but the ones listed in :except to multiple modules" do
-    assert WrapExceptOfMany.a(1) == 2
-    assert WrapExceptOfMany.a(1, 2) == 3
-    assert WrapExceptOfMany.a(1, 2, 3) == 4
-    assert WrapExceptOfMany.b() == 1
-    assert WrapExceptOfMany.b(1, 2) == 3
-    assert WrapExceptOfMany.b(1, 2, 3) == 4
-  end
-
-  test "does not delegate the functions not listed in :Except to multiple modules" do
-    assert_raise UndefinedFunctionError, fn -> WrapExceptOfMany.a() end
-    assert_raise UndefinedFunctionError, fn -> WrapExceptOfMany.b(1) end
+    test "delegates all functions without any prefix" do
+      assert DelegateWithBlankPrefix.a() == 1
+      assert DelegateWithBlankPrefix.a(1) == 2
+      assert DelegateWithBlankPrefix.a(1, 2) == 3
+      assert DelegateWithBlankPrefix.a(1, 2, 3) == 4
+    end
   end
 end

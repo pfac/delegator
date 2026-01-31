@@ -20,6 +20,8 @@ defmodule Delegator do
         funs -> MapSet.new(funs)
       end
 
+    prefix = Keyword.get(opts, :prefix)
+
     for target <- targets do
       functions =
         target
@@ -32,6 +34,14 @@ defmodule Delegator do
       pos_ints = Stream.iterate(1, &(&1 + 1))
 
       for {fun_name, fun_arity} <- functions do
+        delegate_name =
+          case {prefix, fun_name} do
+            {nil, name} -> name
+            {"", name} -> name
+            {prefix, "_" <> name} -> String.to_atom("#{prefix}#{name}")
+            {prefix, name} -> String.to_atom("#{prefix}_#{name}")
+          end
+
         fun_args =
           pos_ints
           |> Stream.take(fun_arity)
@@ -40,7 +50,9 @@ defmodule Delegator do
           |> Enum.map(&{&1, [], nil})
 
         quote do
-          defdelegate unquote(fun_name)(unquote_splicing(fun_args)), to: unquote(target)
+          defdelegate unquote(delegate_name)(unquote_splicing(fun_args)),
+            to: unquote(target),
+            as: unquote(fun_name)
         end
       end
     end
