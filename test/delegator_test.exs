@@ -51,6 +51,8 @@ defmodule DelegatorTest do
 
   test "does not delegate the functions not listed in :only to a single module" do
     assert_raise UndefinedFunctionError, fn -> WrapOnlyOfOne.a(1) end
+    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfOne.a(1, 2) end
+    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfOne.a(1, 2, 3) end
   end
 
   defmodule WrapOnlyOfMany do
@@ -63,7 +65,43 @@ defmodule DelegatorTest do
   end
 
   test "does not delegate the functions not listed in :only to multiple modules" do
-    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfMany.a(1) end
-    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfMany.b() end
+    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfOne.a(1) end
+    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfOne.a(1, 2) end
+    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfOne.a(1, 2, 3) end
+    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfOne.b() end
+    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfOne.b(1, 2) end
+    assert_raise UndefinedFunctionError, fn -> WrapOnlyOfOne.b(1, 2, 3) end
+  end
+
+  defmodule WrapExceptOfOne do
+    use Delegator, to: DelegatorTest.A, except: [a: 0]
+  end
+
+  test "delegates all the functions but the ones listed in :except to a single module" do
+    assert WrapExceptOfOne.a(1) == 2
+    assert WrapExceptOfOne.a(1, 2) == 3
+    assert WrapExceptOfOne.a(1, 2, 3) == 4
+  end
+
+  test "does not delegate the functions listed in :except to a single module" do
+    assert_raise UndefinedFunctionError, fn -> WrapExceptOfOne.a() end
+  end
+
+  defmodule WrapExceptOfMany do
+    use Delegator, to: [DelegatorTest.A, DelegatorTest.B], except: [a: 0, b: 1]
+  end
+
+  test "delegates all the functions but the ones listed in :except to multiple modules" do
+    assert WrapExceptOfMany.a(1) == 2
+    assert WrapExceptOfMany.a(1, 2) == 3
+    assert WrapExceptOfMany.a(1, 2, 3) == 4
+    assert WrapExceptOfMany.b() == 1
+    assert WrapExceptOfMany.b(1, 2) == 3
+    assert WrapExceptOfMany.b(1, 2, 3) == 4
+  end
+
+  test "does not delegate the functions not listed in :Except to multiple modules" do
+    assert_raise UndefinedFunctionError, fn -> WrapExceptOfMany.a() end
+    assert_raise UndefinedFunctionError, fn -> WrapExceptOfMany.b(1) end
   end
 end

@@ -8,6 +8,12 @@ defmodule Delegator do
         {_, _, _} = target -> [target]
       end
 
+    except =
+      case Keyword.get(opts, :except) do
+        nil -> nil
+        funs -> MapSet.new(funs)
+      end
+
     only =
       case Keyword.get(opts, :only) do
         nil -> nil
@@ -20,6 +26,7 @@ defmodule Delegator do
         |> Macro.expand(__CALLER__)
         |> Kernel.apply(:__info__, [:functions])
         |> MapSet.new()
+        |> then(&if is_nil(except), do: &1, else: MapSet.difference(&1, except))
         |> then(&if is_nil(only), do: &1, else: MapSet.intersection(&1, only))
 
       pos_ints = Stream.iterate(1, &(&1 + 1))
