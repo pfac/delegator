@@ -212,4 +212,64 @@ defmodule DelegatorTest do
       assert DelegateWithBlankPrefix.a(1, 2, 3) == 4
     end
   end
+
+  describe "with suffix: nil" do
+    defmodule DelegateWithNilSuffix do
+      use Delegator, to: DelegatorTest.A, suffix: nil
+    end
+
+    test "delegates all functions without any suffix" do
+      assert DelegateWithNilSuffix.a() == 1
+      assert DelegateWithNilSuffix.a(1) == 2
+      assert DelegateWithNilSuffix.a(1, 2) == 3
+      assert DelegateWithNilSuffix.a(1, 2, 3) == 4
+    end
+  end
+
+  describe "with suffix: :atom" do
+    defmodule DelegateWithAtomSuffix do
+      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], suffix: :suffix
+    end
+
+    test "delegates all functions suffixed" do
+      assert DelegateWithAtomSuffix.a_suffix() == 1
+      assert DelegateWithAtomSuffix.a_suffix(1) == 2
+      assert DelegateWithAtomSuffix.a_suffix(1, 2) == 3
+      assert DelegateWithAtomSuffix.a_suffix(1, 2, 3) == 4
+      assert DelegateWithAtomSuffix.b_suffix() == 1
+      assert DelegateWithAtomSuffix.b_suffix(1) == 2
+      assert DelegateWithAtomSuffix.b_suffix(1, 2) == 3
+      assert DelegateWithAtomSuffix.b_suffix(1, 2, 3) == 4
+    end
+  end
+
+  describe "with suffix: \"string\"" do
+    defmodule DelegateWithStringSuffix do
+      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], suffix: "suffix"
+    end
+
+    test "delegates all functions suffixed" do
+      assert DelegateWithStringSuffix.a_suffix() == 1
+      assert DelegateWithStringSuffix.a_suffix(1) == 2
+      assert DelegateWithStringSuffix.a_suffix(1, 2) == 3
+      assert DelegateWithStringSuffix.a_suffix(1, 2, 3) == 4
+      assert DelegateWithStringSuffix.b_suffix() == 1
+      assert DelegateWithStringSuffix.b_suffix(1) == 2
+      assert DelegateWithStringSuffix.b_suffix(1, 2) == 3
+      assert DelegateWithStringSuffix.b_suffix(1, 2, 3) == 4
+    end
+  end
+
+  describe "with suffix: \"\"" do
+    defmodule DelegateWithBlankSuffix do
+      use Delegator, to: DelegatorTest.A, suffix: ""
+    end
+
+    test "delegates all functions without any suffix" do
+      assert DelegateWithBlankSuffix.a() == 1
+      assert DelegateWithBlankSuffix.a(1) == 2
+      assert DelegateWithBlankSuffix.a(1, 2) == 3
+      assert DelegateWithBlankSuffix.a(1, 2, 3) == 4
+    end
+  end
 end

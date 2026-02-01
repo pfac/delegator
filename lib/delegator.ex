@@ -21,6 +21,7 @@ defmodule Delegator do
       end
 
     prefix = Keyword.get(opts, :prefix)
+    suffix = Keyword.get(opts, :suffix)
 
     for target <- targets do
       functions =
@@ -34,13 +35,7 @@ defmodule Delegator do
       pos_ints = Stream.iterate(1, &(&1 + 1))
 
       for {fun_name, fun_arity} <- functions do
-        delegate_name =
-          case {prefix, fun_name} do
-            {nil, name} -> name
-            {"", name} -> name
-            {prefix, "_" <> name} -> String.to_atom("#{prefix}#{name}")
-            {prefix, name} -> String.to_atom("#{prefix}_#{name}")
-          end
+        delegate_name = fun_name |> Delegator.delegate_name(opts) |> String.to_atom()
 
         fun_args =
           pos_ints
@@ -55,6 +50,31 @@ defmodule Delegator do
             as: unquote(fun_name)
         end
       end
+    end
+  end
+
+  def delegate_name(fun_name, opts \\ []) do
+    prefix = Keyword.get(opts, :prefix)
+    suffix = Keyword.get(opts, :suffix)
+
+    "#{fun_name}"
+    |> prefix_fun_name(prefix)
+    |> suffix_fun_name(suffix)
+  end
+
+  defp prefix_fun_name(fun_name, prefix) do
+    cond do
+      "#{prefix}" == "" -> fun_name
+      String.starts_with?(fun_name, "_") -> prefix <> fun_name
+      true -> "#{prefix}_#{fun_name}"
+    end
+  end
+
+  defp suffix_fun_name(fun_name, suffix) do
+    cond do
+      "#{suffix}" == "" -> fun_name
+      String.ends_with?(fun_name, "_") -> fun_name <> suffix
+      true -> "#{fun_name}_#{suffix}"
     end
   end
 end
