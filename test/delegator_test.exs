@@ -272,4 +272,43 @@ defmodule DelegatorTest do
       assert DelegateWithBlankSuffix.a(1, 2, 3) == 4
     end
   end
+
+  describe "with as: nil" do
+    defmodule DelegateWithNilAs do
+      use Delegator, to: DelegatorTest.A, as: nil
+    end
+
+    test "delegates all functions without any aliases" do
+      assert DelegateWithNilAs.a() == 1
+      assert DelegateWithNilAs.a(1) == 2
+      assert DelegateWithNilAs.a(1, 2) == 3
+      assert DelegateWithNilAs.a(1, 2, 3) == 4
+    end
+  end
+
+  describe "with as: []" do
+    defmodule DelegateWithEmptyAs do
+      use Delegator, to: DelegatorTest.A, as: []
+    end
+
+    test "delegates all functions without any aliases" do
+      assert DelegateWithEmptyAs.a() == 1
+      assert DelegateWithEmptyAs.a(1) == 2
+      assert DelegateWithEmptyAs.a(1, 2) == 3
+      assert DelegateWithEmptyAs.a(1, 2, 3) == 4
+    end
+  end
+
+  describe "with as: [a: :c]" do
+    defmodule DelegateWithSimpleAs do
+      use Delegator, to: DelegatorTest.A, as: [a: :c]
+    end
+
+    test "delegates all :a functions aliased as :c" do
+      assert DelegateWithSimpleAs.c() == 1
+      assert DelegateWithSimpleAs.c(1) == 2
+      assert DelegateWithSimpleAs.c(1, 2) == 3
+      assert DelegateWithSimpleAs.c(1, 2, 3) == 4
+    end
+  end
 end

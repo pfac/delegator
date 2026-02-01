@@ -20,6 +20,7 @@ defmodule Delegator do
         funs -> MapSet.new(funs)
       end
 
+    aliases = Delegator.aliases(opts)
     prefix = Keyword.get(opts, :prefix)
     suffix = Keyword.get(opts, :suffix)
 
@@ -35,7 +36,7 @@ defmodule Delegator do
       pos_ints = Stream.iterate(1, &(&1 + 1))
 
       for {fun_name, fun_arity} <- functions do
-        delegate_name = fun_name |> Delegator.delegate_name(opts) |> String.to_atom()
+        delegate_name = fun_name |> Delegator.delegate_name(aliases, prefix, suffix) |> String.to_atom()
 
         fun_args =
           pos_ints
@@ -53,13 +54,24 @@ defmodule Delegator do
     end
   end
 
+  def aliases(opts) do
+    case opts[:as] do
+      nil -> %{}
+      kw -> Map.new(kw, fn {k,v} -> {"#{k}", "#{v}"} end)
+    end
+  end
+
   def delegate_name(fun_name, opts \\ []) do
     prefix = Keyword.get(opts, :prefix)
     suffix = Keyword.get(opts, :suffix)
 
-    "#{fun_name}"
-    |> prefix_fun_name(prefix)
-    |> suffix_fun_name(suffix)
+    delegate_name(fun_name, aliases(opts), prefix, suffix)
+  end
+
+  def delegate_name(fun_name, aliases, prefix, suffix) do
+    with nil <- aliases["#{fun_name}"] do
+      "#{fun_name}" |> prefix_fun_name(prefix) |> suffix_fun_name(suffix)
+    end
   end
 
   defp prefix_fun_name(fun_name, prefix) do
