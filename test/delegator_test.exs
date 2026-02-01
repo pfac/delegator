@@ -338,4 +338,21 @@ defmodule DelegatorTest do
       assert DelegateWithSimpleMapAs.c(1, 2, 3) == 4
     end
   end
+
+  describe "with as: %{{:a, 0} => :c}" do
+    defmodule DelegateWithSpecificMapAs do
+      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], as: %{{:a, 0} => :c}
+    end
+
+    test "delegates all functions with a/0 aliased to c/0" do
+      assert DelegateWithSpecificMapAs.c() == 1
+      assert DelegateWithSpecificMapAs.a(1) == 2
+      assert DelegateWithSpecificMapAs.a(1, 2) == 3
+      assert DelegateWithSpecificMapAs.a(1, 2, 3) == 4
+      assert DelegateWithSpecificMapAs.b() == 1
+      assert DelegateWithSpecificMapAs.b(1) == 2
+      assert DelegateWithSpecificMapAs.b(1, 2) == 3
+      assert DelegateWithSpecificMapAs.b(1, 2, 3) == 4
+    end
+  end
 end

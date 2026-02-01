@@ -37,7 +37,9 @@ defmodule Delegator do
 
       for {fun_name, fun_arity} <- functions do
         delegate_name =
-          fun_name |> Delegator.delegate_name(aliases, prefix, suffix) |> String.to_atom()
+          {fun_name, fun_arity}
+          |> Delegator.delegate_name(aliases, prefix, suffix)
+          |> String.to_atom()
 
         fun_args =
           pos_ints
@@ -63,18 +65,14 @@ defmodule Delegator do
         kw -> kw
       end
 
-    Map.new(entries, fn {k, v} -> {"#{k}", "#{v}"} end)
+    Map.new(entries, fn
+      {{fun_name, fun_arity}, fun_alias} -> {{"#{fun_name}", fun_arity}, "#{fun_alias}"}
+      {fun_name, fun_alias} -> {"#{fun_name}", "#{fun_alias}"}
+    end)
   end
 
-  def delegate_name(fun_name, opts \\ []) do
-    prefix = Keyword.get(opts, :prefix)
-    suffix = Keyword.get(opts, :suffix)
-
-    delegate_name(fun_name, aliases(opts), prefix, suffix)
-  end
-
-  def delegate_name(fun_name, aliases, prefix, suffix) do
-    with nil <- aliases["#{fun_name}"] do
+  def delegate_name({fun_name, fun_arity}, aliases, prefix, suffix) do
+    with nil <- aliases["#{fun_name}"] || aliases[{"#{fun_name}", fun_arity}] do
       "#{fun_name}" |> prefix_fun_name(prefix) |> suffix_fun_name(suffix)
     end
   end
