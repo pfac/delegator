@@ -56,10 +56,14 @@ defmodule Delegator do
   end
 
   def aliases(opts) do
-    case opts[:as] do
-      nil -> %{}
-      kw -> Map.new(kw, fn {k, v} -> {"#{k}", "#{v}"} end)
-    end
+    entries =
+      case opts[:as] do
+        nil -> []
+        {:%{}, _, kw} -> kw
+        kw -> kw
+      end
+
+    Map.new(entries, fn {k, v} -> {"#{k}", "#{v}"} end)
   end
 
   def delegate_name(fun_name, opts \\ []) do

@@ -306,15 +306,36 @@ defmodule DelegatorTest do
   end
 
   describe "with as: [a: :c]" do
-    defmodule DelegateWithSimpleAs do
-      use Delegator, to: DelegatorTest.A, as: [a: :c]
+    defmodule DelegateWithKeywordAs do
+      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], as: [a: :c]
     end
 
     test "delegates all :a functions aliased as :c" do
-      assert DelegateWithSimpleAs.c() == 1
-      assert DelegateWithSimpleAs.c(1) == 2
-      assert DelegateWithSimpleAs.c(1, 2) == 3
-      assert DelegateWithSimpleAs.c(1, 2, 3) == 4
+      assert DelegateWithKeywordAs.c() == 1
+      assert DelegateWithKeywordAs.c(1) == 2
+      assert DelegateWithKeywordAs.c(1, 2) == 3
+      assert DelegateWithKeywordAs.c(1, 2, 3) == 4
+      assert DelegateWithKeywordAs.b() == 1
+      assert DelegateWithKeywordAs.b(1) == 2
+      assert DelegateWithKeywordAs.b(1, 2) == 3
+      assert DelegateWithKeywordAs.b(1, 2, 3) == 4
+    end
+  end
+
+  describe "with as: %{b: :c}" do
+    defmodule DelegateWithSimpleMapAs do
+      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], as: %{b: :c}
+    end
+
+    test "delegates all :a functions aliased as :c" do
+      assert DelegateWithSimpleMapAs.a() == 1
+      assert DelegateWithSimpleMapAs.a(1) == 2
+      assert DelegateWithSimpleMapAs.a(1, 2) == 3
+      assert DelegateWithSimpleMapAs.a(1, 2, 3) == 4
+      assert DelegateWithSimpleMapAs.c() == 1
+      assert DelegateWithSimpleMapAs.c(1) == 2
+      assert DelegateWithSimpleMapAs.c(1, 2) == 3
+      assert DelegateWithSimpleMapAs.c(1, 2, 3) == 4
     end
   end
 end
