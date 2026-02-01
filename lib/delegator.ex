@@ -36,7 +36,8 @@ defmodule Delegator do
       pos_ints = Stream.iterate(1, &(&1 + 1))
 
       for {fun_name, fun_arity} <- functions do
-        delegate_name = fun_name |> Delegator.delegate_name(aliases, prefix, suffix) |> String.to_atom()
+        delegate_name =
+          fun_name |> Delegator.delegate_name(aliases, prefix, suffix) |> String.to_atom()
 
         fun_args =
           pos_ints
@@ -57,7 +58,7 @@ defmodule Delegator do
   def aliases(opts) do
     case opts[:as] do
       nil -> %{}
-      kw -> Map.new(kw, fn {k,v} -> {"#{k}", "#{v}"} end)
+      kw -> Map.new(kw, fn {k, v} -> {"#{k}", "#{v}"} end)
     end
   end
 

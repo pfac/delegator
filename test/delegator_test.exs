@@ -1,6 +1,12 @@
 defmodule DelegatorTest do
   use ExUnit.Case
 
+  defmacrop refute_defined(mod, fun, arity) do
+    quote do
+      refute {unquote(fun), unquote(arity)} in unquote(mod).__info__(:functions)
+    end
+  end
+
   defmodule A do
     def a, do: 1
     def a(_), do: 2
@@ -73,12 +79,12 @@ defmodule DelegatorTest do
     end
 
     test "does not delegate the functions not listed in :only" do
-      assert_raise UndefinedFunctionError, fn -> DelegateWithOnly.a(1) end
-      assert_raise UndefinedFunctionError, fn -> DelegateWithOnly.a(1, 2) end
-      assert_raise UndefinedFunctionError, fn -> DelegateWithOnly.a(1, 2, 3) end
-      assert_raise UndefinedFunctionError, fn -> DelegateWithOnly.b() end
-      assert_raise UndefinedFunctionError, fn -> DelegateWithOnly.b(1, 2) end
-      assert_raise UndefinedFunctionError, fn -> DelegateWithOnly.b(1, 2, 3) end
+      refute_defined DelegateWithOnly, :a, 1
+      refute_defined DelegateWithOnly, :a, 2
+      refute_defined DelegateWithOnly, :a, 3
+      refute_defined DelegateWithOnly, :b, 0
+      refute_defined DelegateWithOnly, :b, 2
+      refute_defined DelegateWithOnly, :b, 3
     end
   end
 
@@ -88,14 +94,14 @@ defmodule DelegatorTest do
     end
 
     test "does not delegate the any functions" do
-      assert_raise UndefinedFunctionError, fn -> DelegateWithEmptyOnly.a() end
-      assert_raise UndefinedFunctionError, fn -> DelegateWithEmptyOnly.a(1) end
-      assert_raise UndefinedFunctionError, fn -> DelegateWithEmptyOnly.a(1, 2) end
-      assert_raise UndefinedFunctionError, fn -> DelegateWithEmptyOnly.a(1, 2, 3) end
-      assert_raise UndefinedFunctionError, fn -> DelegateWithEmptyOnly.b() end
-      assert_raise UndefinedFunctionError, fn -> DelegateWithEmptyOnly.b(1) end
-      assert_raise UndefinedFunctionError, fn -> DelegateWithEmptyOnly.b(1, 2) end
-      assert_raise UndefinedFunctionError, fn -> DelegateWithEmptyOnly.b(1, 2, 3) end
+      refute_defined DelegateWithEmptyOnly, :a, 0
+      refute_defined DelegateWithEmptyOnly, :a, 1
+      refute_defined DelegateWithEmptyOnly, :a, 2
+      refute_defined DelegateWithEmptyOnly, :a, 3
+      refute_defined DelegateWithEmptyOnly, :b, 0
+      refute_defined DelegateWithEmptyOnly, :b, 1
+      refute_defined DelegateWithEmptyOnly, :b, 2
+      refute_defined DelegateWithEmptyOnly, :b, 3
     end
   end
 
@@ -131,8 +137,8 @@ defmodule DelegatorTest do
     end
 
     test "does not delegate the functions not listed in :except" do
-      assert_raise UndefinedFunctionError, fn -> DelegateWithExcept.a() end
-      assert_raise UndefinedFunctionError, fn -> DelegateWithExcept.b(1) end
+      refute_defined DelegateWithExcept, :a, 0
+      refute_defined DelegateWithExcept, :b, 1
     end
   end
 
