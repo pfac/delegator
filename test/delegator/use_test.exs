@@ -1,4 +1,4 @@
-defmodule DelegatorTest do
+defmodule Delegator.UseTest do
   use ExUnit.Case
 
   defmacrop refute_defined(mod, fun, arity) do
@@ -23,7 +23,7 @@ defmodule DelegatorTest do
 
   describe "delegate to a single module" do
     defmodule DelegateAllToOne do
-      use Delegator, to: DelegatorTest.A
+      use Delegator, to: Delegator.UseTest.A
     end
 
     test "delegates all functions" do
@@ -36,7 +36,7 @@ defmodule DelegatorTest do
 
   describe "delegate to multiple modules" do
     defmodule DelegateAllToMany do
-      use Delegator, to: [DelegatorTest.A, DelegatorTest.B]
+      use Delegator, to: [Delegator.UseTest.A, Delegator.UseTest.B]
     end
 
     test "delegates all functions" do
@@ -53,7 +53,7 @@ defmodule DelegatorTest do
 
   describe "with only: nil" do
     defmodule DelegateWithNilOnly do
-      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], only: nil
+      use Delegator, to: [Delegator.UseTest.A, Delegator.UseTest.B], only: nil
     end
 
     test "delegates all functions" do
@@ -70,7 +70,7 @@ defmodule DelegatorTest do
 
   describe "with only: [a: 0, b: 1]" do
     defmodule DelegateWithOnly do
-      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], only: [a: 0, b: 1]
+      use Delegator, to: [Delegator.UseTest.A, Delegator.UseTest.B], only: [a: 0, b: 1]
     end
 
     test "delegates the functions listed in :only" do
@@ -90,7 +90,7 @@ defmodule DelegatorTest do
 
   describe "with only: []" do
     defmodule DelegateWithEmptyOnly do
-      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], only: []
+      use Delegator, to: [Delegator.UseTest.A, Delegator.UseTest.B], only: []
     end
 
     test "does not delegate the any functions" do
@@ -107,7 +107,7 @@ defmodule DelegatorTest do
 
   describe "with except: nil" do
     defmodule DelegateWithNilExcept do
-      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], except: nil
+      use Delegator, to: [Delegator.UseTest.A, Delegator.UseTest.B], except: nil
     end
 
     test "delegates all the functions" do
@@ -124,7 +124,7 @@ defmodule DelegatorTest do
 
   describe "with except: [a: 0, b: 1]" do
     defmodule DelegateWithExcept do
-      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], except: [a: 0, b: 1]
+      use Delegator, to: [Delegator.UseTest.A, Delegator.UseTest.B], except: [a: 0, b: 1]
     end
 
     test "delegates all the functions but the ones listed in :except" do
@@ -144,7 +144,7 @@ defmodule DelegatorTest do
 
   describe "with except: []" do
     defmodule DelegateWithEmptyExcept do
-      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], except: []
+      use Delegator, to: [Delegator.UseTest.A, Delegator.UseTest.B], except: []
     end
 
     test "delegates all the functions" do
@@ -161,7 +161,7 @@ defmodule DelegatorTest do
 
   describe "with prefix: nil" do
     defmodule DelegateWithNilPrefix do
-      use Delegator, to: DelegatorTest.A, prefix: nil
+      use Delegator, to: Delegator.UseTest.A, prefix: nil
     end
 
     test "delegates all functions without any prefix" do
@@ -174,7 +174,7 @@ defmodule DelegatorTest do
 
   describe "with prefix: :atom" do
     defmodule DelegateWithAtomPrefix do
-      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], prefix: :prefix
+      use Delegator, to: [Delegator.UseTest.A, Delegator.UseTest.B], prefix: :prefix
     end
 
     test "delegates all functions prefixed" do
@@ -191,7 +191,7 @@ defmodule DelegatorTest do
 
   describe "with prefix: \"string\"" do
     defmodule DelegateWithStringPrefix do
-      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], prefix: "prefix"
+      use Delegator, to: [Delegator.UseTest.A, Delegator.UseTest.B], prefix: "prefix"
     end
 
     test "delegates all functions prefixed" do
@@ -208,7 +208,7 @@ defmodule DelegatorTest do
 
   describe "with prefix: \"\"" do
     defmodule DelegateWithBlankPrefix do
-      use Delegator, to: DelegatorTest.A, prefix: ""
+      use Delegator, to: Delegator.UseTest.A, prefix: ""
     end
 
     test "delegates all functions without any prefix" do
@@ -221,7 +221,7 @@ defmodule DelegatorTest do
 
   describe "with suffix: nil" do
     defmodule DelegateWithNilSuffix do
-      use Delegator, to: DelegatorTest.A, suffix: nil
+      use Delegator, to: Delegator.UseTest.A, suffix: nil
     end
 
     test "delegates all functions without any suffix" do
@@ -234,7 +234,7 @@ defmodule DelegatorTest do
 
   describe "with suffix: :atom" do
     defmodule DelegateWithAtomSuffix do
-      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], suffix: :suffix
+      use Delegator, to: [Delegator.UseTest.A, Delegator.UseTest.B], suffix: :suffix
     end
 
     test "delegates all functions suffixed" do
@@ -251,7 +251,7 @@ defmodule DelegatorTest do
 
   describe "with suffix: \"string\"" do
     defmodule DelegateWithStringSuffix do
-      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], suffix: "suffix"
+      use Delegator, to: [Delegator.UseTest.A, Delegator.UseTest.B], suffix: "suffix"
     end
 
     test "delegates all functions suffixed" do
@@ -268,7 +268,7 @@ defmodule DelegatorTest do
 
   describe "with suffix: \"\"" do
     defmodule DelegateWithBlankSuffix do
-      use Delegator, to: DelegatorTest.A, suffix: ""
+      use Delegator, to: Delegator.UseTest.A, suffix: ""
     end
 
     test "delegates all functions without any suffix" do
@@ -281,7 +281,7 @@ defmodule DelegatorTest do
 
   describe "with as: nil" do
     defmodule DelegateWithNilAs do
-      use Delegator, to: DelegatorTest.A, as: nil
+      use Delegator, to: Delegator.UseTest.A, as: nil
     end
 
     test "delegates all functions without any aliases" do
@@ -294,7 +294,7 @@ defmodule DelegatorTest do
 
   describe "with as: []" do
     defmodule DelegateWithEmptyAs do
-      use Delegator, to: DelegatorTest.A, as: []
+      use Delegator, to: Delegator.UseTest.A, as: []
     end
 
     test "delegates all functions without any aliases" do
@@ -307,7 +307,7 @@ defmodule DelegatorTest do
 
   describe "with as: [a: :c]" do
     defmodule DelegateWithKeywordAs do
-      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], as: [a: :c]
+      use Delegator, to: [Delegator.UseTest.A, Delegator.UseTest.B], as: [a: :c]
     end
 
     test "delegates all :a functions aliased as :c" do
@@ -324,7 +324,7 @@ defmodule DelegatorTest do
 
   describe "with as: %{b: :c}" do
     defmodule DelegateWithSimpleMapAs do
-      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], as: %{b: :c}
+      use Delegator, to: [Delegator.UseTest.A, Delegator.UseTest.B], as: %{b: :c}
     end
 
     test "delegates all :a functions aliased as :c" do
@@ -341,7 +341,7 @@ defmodule DelegatorTest do
 
   describe "with as: %{{:a, 0} => :c}" do
     defmodule DelegateWithSpecificMapAs do
-      use Delegator, to: [DelegatorTest.A, DelegatorTest.B], as: %{{:a, 0} => :c}
+      use Delegator, to: [Delegator.UseTest.A, Delegator.UseTest.B], as: %{{:a, 0} => :c}
     end
 
     test "delegates all functions with a/0 aliased to c/0" do
