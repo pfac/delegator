@@ -4,6 +4,7 @@
   locals_without_parens: [
     defdelegateall: 1,
     defdelegateall: 2,
+    defdelegatemacro: 2,
     refute_defined: 2,
     refute_defined: 3
   ]

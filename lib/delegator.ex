@@ -63,6 +63,28 @@ defmodule Delegator do
     end
   end
 
+  defmacro defdelegatemacro({name, _, args}, opts \\ []) do
+    as = Keyword.get(opts, :as, name)
+
+    to =
+      with nil <- Keyword.get(opts, :to) do
+        raise ArgumentError, ":to is required"
+      end
+
+    quote do
+      defmacro unquote(as)(unquote_splicing(args)) do
+        to = unquote(to)
+        name = unquote(name)
+        args = unquote(args)
+
+        quote do
+          require unquote(to)
+          unquote(to).unquote(name)(unquote_splicing(args))
+        end
+      end
+    end
+  end
+
   def delegate_name({fun_name, fun_arity}, aliases, prefix, suffix) do
     with nil <- aliases[{"#{fun_name}", :*}] || aliases[{"#{fun_name}", fun_arity}] do
       "#{fun_name}" |> prefix_fun_name(prefix) |> suffix_fun_name(suffix)

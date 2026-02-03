@@ -15,6 +15,12 @@ defmodule Delegator.MacrosTest do
     def b(_, _, _), do: 4
   end
 
+  defmodule M do
+    defmacro m(x, y, z) do
+      quote do: [unquote(x), unquote(y), unquote(z)]
+    end
+  end
+
   describe "defdelegateall/1" do
     defmodule DefDelegateAllWithoutOpts do
       import Delegator
@@ -54,6 +60,25 @@ defmodule Delegator.MacrosTest do
       refute_defined DefDelegateAllWithOpts, :b, 1
       refute_defined DefDelegateAllWithOpts, :b, 2
       refute_defined DefDelegateAllWithOpts, :b, 3
+    end
+  end
+
+  describe "defdelegatemacro/2" do
+    defmodule DefDelegateMacro do
+      import Delegator
+
+      defdelegatemacro m(x, y, z), to: M
+      defdelegatemacro m(x, y, z), to: M, as: :n
+    end
+
+    test "delegates macro" do
+      require DefDelegateMacro
+      assert DefDelegateMacro.m(1, 2, 3) == [1, 2, 3]
+    end
+
+    test "delegates macro with another name" do
+      require DefDelegateMacro
+      assert DefDelegateMacro.n(1, 2, 3) == [1, 2, 3]
     end
   end
 end

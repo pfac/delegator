@@ -48,6 +48,9 @@ defmodule Delegator.Opts do
     end)
   end
 
+  defp arities_map(nil), do: nil
+  defp arities_map(val), do: AritiesMap.new(val)
+
   @doc """
   Extract arities map to exclude from option `:except`.
 
@@ -115,7 +118,4 @@ defmodule Delegator.Opts do
       "after"
   """
   def suffix(opts), do: opts |> Keyword.get(:suffix) |> to_string()
-
-  defp arities_map(nil), do: nil
-  defp arities_map(val), do: AritiesMap.new(val)
 end
