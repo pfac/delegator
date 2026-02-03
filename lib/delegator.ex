@@ -1,5 +1,5 @@
 defmodule Delegator do
-  alias Delegator.Functions
+  alias Delegator.Definitions
   alias Delegator.Opts
 
   defmacro __using__(opts) do
@@ -24,43 +24,65 @@ defmodule Delegator do
     [header | delegates]
   end
 
-  defmacro defdelegateall(target, opts \\ []) do
+  defmacro __delegateall__(type, target, opts \\ []) do
     aliases = Opts.aliases(opts)
     except = Opts.except(opts)
     only = Opts.only(opts)
     prefix = Opts.prefix(opts)
     suffix = Opts.suffix(opts)
 
-    functions =
+    definitions =
       target
       |> Macro.expand(__CALLER__)
-      |> Kernel.apply(:__info__, [:functions])
-      |> then(&if is_nil(except), do: &1, else: Functions.except(&1, except))
-      |> then(&if is_nil(only), do: &1, else: Functions.only(&1, only))
+      |> Kernel.apply(:__info__, [type])
+      |> then(&if is_nil(except), do: &1, else: Definitions.except(&1, except))
+      |> then(&if is_nil(only), do: &1, else: Definitions.only(&1, only))
 
     pos_ints = Stream.iterate(1, &(&1 + 1))
 
-    for {fun_name, fun_arity} <- functions do
-      delegate_name =
-        {fun_name, fun_arity}
-        |> Delegator.delegate_name(aliases, prefix, suffix)
-        |> String.to_atom()
+    {delegated, delegations} =
+      for {name, arity} <- definitions do
+        delegate_name =
+          {name, arity}
+          |> Delegator.delegate_name(aliases, prefix, suffix)
+          |> String.to_atom()
 
-      fun_args =
-        pos_ints
-        |> Stream.take(fun_arity)
-        |> Stream.map(&"arg#{&1}")
-        |> Stream.map(&String.to_atom/1)
-        |> Enum.map(&{&1, [], nil})
+        args =
+          pos_ints
+          |> Stream.take(arity)
+          |> Stream.map(&"arg#{&1}")
+          |> Stream.map(&String.to_atom/1)
+          |> Enum.map(&{&1, [], nil})
 
-      quote do
-        defdelegate unquote(delegate_name)(unquote_splicing(fun_args)),
-          to: unquote(target),
-          as: unquote(fun_name)
+        {delegate_mod, delegate_macro} =
+          case type do
+            :functions -> {Kernel, :defdelegate}
+            :macros -> {Delegator, :defdelegatemacro}
+          end
 
-        defoverridable [{unquote(delegate_name), unquote(fun_arity)}]
+        delegation =
+          quote do
+            unquote(delegate_mod).unquote(delegate_macro)(
+              unquote(delegate_name)(unquote_splicing(args)),
+              to: unquote(target),
+              as: unquote(name)
+            )
+          end
+
+        {{delegate_name, arity}, delegation}
       end
-    end
+      |> Enum.unzip()
+
+    overrides =
+      if type === :functions do
+        quote do: defoverridable(unquote(delegated))
+      end
+
+    delegations ++ [overrides]
+  end
+
+  defmacro defdelegateall(target, opts \\ []) do
+    quote do: Delegator.__delegateall__(:functions, unquote(target), unquote(opts))
   end
 
   defmacro defdelegatemacro({name, _, args}, opts \\ []) do
@@ -86,40 +108,7 @@ defmodule Delegator do
   end
 
   defmacro defdelegateallmacros(target, opts \\ []) do
-    aliases = Opts.aliases(opts)
-    except = Opts.except(opts)
-    only = Opts.only(opts)
-    prefix = Opts.prefix(opts)
-    suffix = Opts.suffix(opts)
-
-    macros =
-      target
-      |> Macro.expand(__CALLER__)
-      |> Kernel.apply(:__info__, [:macros])
-      |> then(&if is_nil(except), do: &1, else: Functions.except(&1, except))
-      |> then(&if is_nil(only), do: &1, else: Functions.only(&1, only))
-
-    pos_ints = Stream.iterate(1, &(&1 + 1))
-
-    for {name, arity} <- macros do
-      delegate_name =
-        {name, arity}
-        |> Delegator.delegate_name(aliases, prefix, suffix)
-        |> String.to_atom()
-
-      args =
-        pos_ints
-        |> Stream.take(arity)
-        |> Stream.map(&"arg#{&1}")
-        |> Stream.map(&String.to_atom/1)
-        |> Enum.map(&{&1, [], nil})
-
-      quote do
-        defdelegatemacro unquote(delegate_name)(unquote_splicing(args)),
-          to: unquote(target),
-          as: unquote(name)
-      end
-    end
+    quote do: Delegator.__delegateall__(:macros, unquote(target), unquote(opts))
   end
 
   def delegate_name({fun_name, fun_arity}, aliases, prefix, suffix) do
