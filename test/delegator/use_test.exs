@@ -51,6 +51,21 @@ defmodule Delegator.UseTest do
     end
   end
 
+  describe "delegates are overridable" do
+    defmodule DelegatesAreOverridable do
+      use Delegator, to: Delegator.UseTest.A
+
+      def a(_, _, _), do: 5
+    end
+
+    test "delegates all functions" do
+      assert DelegatesAreOverridable.a() == 1
+      assert DelegatesAreOverridable.a(1) == 2
+      assert DelegatesAreOverridable.a(1, 2) == 3
+      assert DelegatesAreOverridable.a(1, 2, 3) == 5
+    end
+  end
+
   describe "with only: nil" do
     defmodule DelegateWithNilOnly do
       use Delegator, to: [Delegator.UseTest.A, Delegator.UseTest.B], only: nil

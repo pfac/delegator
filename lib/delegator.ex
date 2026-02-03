@@ -57,6 +57,8 @@ defmodule Delegator do
         defdelegate unquote(delegate_name)(unquote_splicing(fun_args)),
           to: unquote(target),
           as: unquote(fun_name)
+
+        defoverridable [{unquote(delegate_name), unquote(fun_arity)}]
       end
     end
   end
