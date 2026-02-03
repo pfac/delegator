@@ -72,15 +72,52 @@ defmodule Delegator do
       end
 
     quote do
-      defmacro unquote(as)(unquote_splicing(args)) do
+      defmacro unquote(name)(unquote_splicing(args)) do
+        as = unquote(as)
         to = unquote(to)
-        name = unquote(name)
         args = unquote(args)
 
         quote do
           require unquote(to)
-          unquote(to).unquote(name)(unquote_splicing(args))
+          unquote(to).unquote(as)(unquote_splicing(args))
         end
+      end
+    end
+  end
+
+  defmacro defdelegateallmacros(target, opts \\ []) do
+    aliases = Opts.aliases(opts)
+    except = Opts.except(opts)
+    only = Opts.only(opts)
+    prefix = Opts.prefix(opts)
+    suffix = Opts.suffix(opts)
+
+    macros =
+      target
+      |> Macro.expand(__CALLER__)
+      |> Kernel.apply(:__info__, [:macros])
+      |> then(&if is_nil(except), do: &1, else: Functions.except(&1, except))
+      |> then(&if is_nil(only), do: &1, else: Functions.only(&1, only))
+
+    pos_ints = Stream.iterate(1, &(&1 + 1))
+
+    for {name, arity} <- macros do
+      delegate_name =
+        {name, arity}
+        |> Delegator.delegate_name(aliases, prefix, suffix)
+        |> String.to_atom()
+
+      args =
+        pos_ints
+        |> Stream.take(arity)
+        |> Stream.map(&"arg#{&1}")
+        |> Stream.map(&String.to_atom/1)
+        |> Enum.map(&{&1, [], nil})
+
+      quote do
+        defdelegatemacro unquote(delegate_name)(unquote_splicing(args)),
+          to: unquote(target),
+          as: unquote(name)
       end
     end
   end

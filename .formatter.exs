@@ -4,8 +4,12 @@
   locals_without_parens: [
     defdelegateall: 1,
     defdelegateall: 2,
+    defdelegateallmacros: 1,
+    defdelegateallmacros: 2,
     defdelegatemacro: 2,
     refute_defined: 2,
-    refute_defined: 3
+    refute_defined: 3,
+    refute_macro: 2,
+    refute_macro: 3
   ]
 ]

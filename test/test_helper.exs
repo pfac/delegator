@@ -16,6 +16,24 @@ defmodule Delegator.Test.Assertions do
       refute {unquote(fun), unquote(arity)} in unquote(mod).__info__(:functions)
     end
   end
+
+  @doc """
+  Refutes a module implements any macro with a given name.
+  """
+  defmacro refute_macro(mod, fun) do
+    quote do
+      refute Keyword.has_key?(unquote(mod).__info__(:macros), unquote(fun))
+    end
+  end
+
+  @doc """
+  Refutes a module implements a specific macro.
+  """
+  defmacro refute_macro(mod, fun, arity) do
+    quote do
+      refute {unquote(fun), unquote(arity)} in unquote(mod).__info__(:macros)
+    end
+  end
 end
 
 defmodule Delegator.Test.Case do
