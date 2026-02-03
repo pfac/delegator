@@ -1,4 +1,5 @@
 defmodule Delegator do
+  alias Delegator.Functions
   alias Delegator.Opts
 
   defmacro __using__(opts) do
@@ -34,9 +35,8 @@ defmodule Delegator do
       target
       |> Macro.expand(__CALLER__)
       |> Kernel.apply(:__info__, [:functions])
-      |> MapSet.new()
-      |> then(&if is_nil(except), do: &1, else: MapSet.difference(&1, except))
-      |> then(&if is_nil(only), do: &1, else: MapSet.intersection(&1, only))
+      |> then(&if is_nil(except), do: &1, else: Functions.except(&1, except))
+      |> then(&if is_nil(only), do: &1, else: Functions.only(&1, only))
 
     pos_ints = Stream.iterate(1, &(&1 + 1))
 
@@ -62,7 +62,7 @@ defmodule Delegator do
   end
 
   def delegate_name({fun_name, fun_arity}, aliases, prefix, suffix) do
-    with nil <- aliases["#{fun_name}"] || aliases[{"#{fun_name}", fun_arity}] do
+    with nil <- aliases[{"#{fun_name}", :*}] || aliases[{"#{fun_name}", fun_arity}] do
       "#{fun_name}" |> prefix_fun_name(prefix) |> suffix_fun_name(suffix)
     end
   end
