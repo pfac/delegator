@@ -1,4 +1,6 @@
 defmodule Delegator.Definitions do
+  @moduledoc false
+
   alias Delegator.AritiesMap
 
   @doc """

@@ -1,4 +1,6 @@
 defmodule Delegator.Test.Assertions do
+  @moduledoc false
+
   @doc """
   Refutes a module implements any function with a given name.
   """
@@ -37,6 +39,8 @@ defmodule Delegator.Test.Assertions do
 end
 
 defmodule Delegator.Test.Case do
+  @moduledoc false
+
   use ExUnit.CaseTemplate
 
   using do

@@ -13,5 +13,6 @@
     refute_defined: 3,
     refute_macro: 2,
     refute_macro: 3
-  ]
+  ],
+  plugins: [Styler]
 ]

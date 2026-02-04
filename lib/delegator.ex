@@ -1,4 +1,6 @@
 defmodule Delegator do
+  @moduledoc false
+
   alias Delegator.AliasesMap
   alias Delegator.Definitions
   alias Delegator.Opts
@@ -41,7 +43,7 @@ defmodule Delegator do
 
     pos_ints = Stream.iterate(1, &(&1 + 1))
 
-    {delegated, delegations} =
+    result =
       for {name, arity} <- definitions do
         delegate_name =
           {name, arity}
@@ -72,7 +74,8 @@ defmodule Delegator do
 
         {{delegate_name, arity}, delegation}
       end
-      |> Enum.unzip()
+
+    {delegated, delegations} = Enum.unzip(result)
 
     overrides =
       if type === :functions do
@@ -102,6 +105,7 @@ defmodule Delegator do
 
         quote do
           require unquote(to)
+
           unquote(to).unquote(as)(unquote_splicing(args))
         end
       end
