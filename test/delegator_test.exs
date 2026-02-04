@@ -1,4 +1,4 @@
-defmodule Delegator.MacrosTest do
+defmodule DelegatorTest do
   use Delegator.Test.Case
 
   defmodule A do
@@ -56,6 +56,16 @@ defmodule Delegator.MacrosTest do
     test "does not delegate any function in B" do
       refute_defined DefDelegateAll, :b
     end
+
+    defmodule DelegatedFunctionsAreOverridable do
+      use Delegator, to: A
+
+      def a(_, _, _), do: 5
+    end
+
+    test "delegated functions are overridable" do
+      assert DelegatedFunctionsAreOverridable.a(1, 2, 3) == 5
+    end
   end
 
   describe "defdelegateall/2" do
@@ -65,6 +75,8 @@ defmodule Delegator.MacrosTest do
       defdelegateall A, as: [a: :c]
       defdelegateall A, except: [a: 0]
       defdelegateall B, only: [b: 0]
+      defdelegateall B, prefix: :before
+      defdelegateall B, suffix: :after
     end
 
     test "aliases all a/* functions in A as c/*" do
@@ -86,6 +98,20 @@ defmodule Delegator.MacrosTest do
       refute_defined DefDelegateAllWithOpts, :b, 1
       refute_defined DefDelegateAllWithOpts, :b, 2
       refute_defined DefDelegateAllWithOpts, :b, 3
+    end
+
+    test "delegates all functions in B prefixed" do
+      assert DefDelegateAllWithOpts.before_b()
+      assert DefDelegateAllWithOpts.before_b(1) == 2
+      assert DefDelegateAllWithOpts.before_b(1, 2) == 3
+      assert DefDelegateAllWithOpts.before_b(1, 2, 3) == 4
+    end
+
+    test "delegates all functions in B suffixed" do
+      assert DefDelegateAllWithOpts.b_after()
+      assert DefDelegateAllWithOpts.b_after(1) == 2
+      assert DefDelegateAllWithOpts.b_after(1, 2) == 3
+      assert DefDelegateAllWithOpts.b_after(1, 2, 3) == 4
     end
   end
 
@@ -135,6 +161,8 @@ defmodule Delegator.MacrosTest do
       defdelegateallmacros A, as: [m: :o]
       defdelegateallmacros A, except: [m: 1]
       defdelegateallmacros B, only: [n: 1]
+      defdelegateallmacros B, prefix: :before
+      defdelegateallmacros B, suffix: :after
     end
 
     test "aliases all m/* macros in A as o/*" do
@@ -156,6 +184,20 @@ defmodule Delegator.MacrosTest do
       assert DefDelegateAllMacrosWithOpts.n(1) == [1]
       refute_macro DefDelegateAllMacrosWithOpts, :n, 2
       refute_macro DefDelegateAllMacrosWithOpts, :n, 3
+    end
+
+    test "delegates all macros in B prefixed" do
+      require DefDelegateAllMacrosWithOpts
+      assert DefDelegateAllMacrosWithOpts.before_n(1) == [1]
+      assert DefDelegateAllMacrosWithOpts.before_n(1, 2) == [2, 1]
+      assert DefDelegateAllMacrosWithOpts.before_n(1, 2, 3) == [3, 2, 1]
+    end
+
+    test "delegates all macros in B suffixed" do
+      require DefDelegateAllMacrosWithOpts
+      assert DefDelegateAllMacrosWithOpts.n_after(1) == [1]
+      assert DefDelegateAllMacrosWithOpts.n_after(1, 2) == [2, 1]
+      assert DefDelegateAllMacrosWithOpts.n_after(1, 2, 3) == [3, 2, 1]
     end
   end
 
@@ -239,6 +281,53 @@ defmodule Delegator.MacrosTest do
       assert DefDelegateEverythingWithOpts.n(1) == [1]
       refute_macro DefDelegateEverythingWithOpts, :n, 2
       refute_macro DefDelegateEverythingWithOpts, :n, 3
+    end
+  end
+
+  describe "use Delegator to a single module" do
+    defmodule DelegateEverythingToOne do
+      use Delegator, to: A
+    end
+
+    test "delegates all functions in A" do
+      assert DelegateEverythingToOne.a() == 1
+      assert DelegateEverythingToOne.a(1) == 2
+      assert DelegateEverythingToOne.a(1, 2) == 3
+      assert DelegateEverythingToOne.a(1, 2, 3) == 4
+    end
+
+    test "delegates all macros in A" do
+      require DelegateEverythingToOne
+      assert DelegateEverythingToOne.m(1) == [1]
+      assert DelegateEverythingToOne.m(1, 2) == [1, 2]
+      assert DelegateEverythingToOne.m(1, 2, 3) == [1, 2, 3]
+    end
+  end
+
+  describe "use Delegator to multiple modules" do
+    defmodule DelegateEverythingToMany do
+      use Delegator, to: [A, B]
+    end
+
+    test "delegates all functions" do
+      assert DelegateEverythingToMany.a() == 1
+      assert DelegateEverythingToMany.a(1) == 2
+      assert DelegateEverythingToMany.a(1, 2) == 3
+      assert DelegateEverythingToMany.a(1, 2, 3) == 4
+      assert DelegateEverythingToMany.b() == 1
+      assert DelegateEverythingToMany.b(1) == 2
+      assert DelegateEverythingToMany.b(1, 2) == 3
+      assert DelegateEverythingToMany.b(1, 2, 3) == 4
+    end
+
+    test "delegates all macros" do
+      require DelegateEverythingToMany
+      assert DelegateEverythingToMany.m(1) == [1]
+      assert DelegateEverythingToMany.m(1, 2) == [1, 2]
+      assert DelegateEverythingToMany.m(1, 2, 3) == [1, 2, 3]
+      assert DelegateEverythingToMany.n(1) == [1]
+      assert DelegateEverythingToMany.n(1, 2) == [2, 1]
+      assert DelegateEverythingToMany.n(1, 2, 3) == [3, 2, 1]
     end
   end
 end

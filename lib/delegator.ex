@@ -19,7 +19,7 @@ defmodule Delegator do
 
     delegates =
       for target <- targets do
-        quote do: defdelegateall(unquote(target), unquote(opts))
+        quote do: defdelegateeverything(unquote(target), unquote(opts))
       end
 
     [header | delegates]
