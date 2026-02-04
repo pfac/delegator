@@ -112,6 +112,13 @@ defmodule Delegator do
     quote do: Delegator.__delegateall__(:macros, unquote(target), unquote(opts))
   end
 
+  defmacro defdelegateeverything(target, opts \\ []) do
+    quote do
+      defdelegateall unquote(target), unquote(opts)
+      defdelegateallmacros unquote(target), unquote(opts)
+    end
+  end
+
   def delegate_name({name, arity}, aliases, prefix, suffix) do
     name = to_string(name)
 

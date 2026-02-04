@@ -6,6 +6,8 @@
     defdelegateall: 2,
     defdelegateallmacros: 1,
     defdelegateallmacros: 2,
+    defdelegateeverything: 1,
+    defdelegateeverything: 2,
     defdelegatemacro: 2,
     refute_defined: 2,
     refute_defined: 3,
