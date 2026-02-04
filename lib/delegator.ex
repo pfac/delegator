@@ -1,4 +1,5 @@
 defmodule Delegator do
+  alias Delegator.AliasesMap
   alias Delegator.Definitions
   alias Delegator.Opts
 
@@ -111,9 +112,11 @@ defmodule Delegator do
     quote do: Delegator.__delegateall__(:macros, unquote(target), unquote(opts))
   end
 
-  def delegate_name({fun_name, fun_arity}, aliases, prefix, suffix) do
-    with nil <- aliases[{"#{fun_name}", :*}] || aliases[{"#{fun_name}", fun_arity}] do
-      "#{fun_name}" |> prefix_fun_name(prefix) |> suffix_fun_name(suffix)
+  def delegate_name({name, arity}, aliases, prefix, suffix) do
+    name = to_string(name)
+
+    with nil <- AliasesMap.get(aliases, {name, arity}) do
+      name |> prefix_fun_name(prefix) |> suffix_fun_name(suffix)
     end
   end
 

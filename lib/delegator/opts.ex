@@ -3,6 +3,7 @@ defmodule Delegator.Opts do
   Shared module for consistent options handling in Delegator.
   """
 
+  alias Delegator.AliasesMap
   alias Delegator.AritiesMap
 
   @doc """
@@ -14,38 +15,35 @@ defmodule Delegator.Opts do
   which case the alias applies only to that specific function. The value of the
   entries may be a string or atom.
 
-  Returns a map with all the aliases normalized. Returns `nil` whether the
-  option is not provided or explicitly set so.
+  Returns a `Delegator.AliasesMap`. Returns `nil` whether the option is not
+  provided or explicitly set so.
 
   ## Examples
 
       iex> Delegator.Opts.aliases(as: %{a: :c})
-      %{{"a", :*} => "c"}
+      #Delegator.AliasesMap<aliases: %{{"a", :*} => "c"}>
 
       iex> Delegator.Opts.aliases(as: [a: "c"])
-      %{{"a", :*} => "c"}
+      #Delegator.AliasesMap<aliases: %{{"a", :*} => "c"}>
 
       iex> Delegator.Opts.aliases(as: %{"a" => "c"})
-      %{{"a", :*} => "c"}
+      #Delegator.AliasesMap<aliases: %{{"a", :*} => "c"}>
 
       iex> Delegator.Opts.aliases(as: %{{:a, 1} => :c})
-      %{{"a", 1} => "c"}
+      #Delegator.AliasesMap<aliases: %{{"a", 1} => "c"}>
 
       iex> Delegator.Opts.aliases(as: [{{:a, 1}, :c}])
-      %{{"a", 1} => "c"}
+      #Delegator.AliasesMap<aliases: %{{"a", 1} => "c"}>
   """
   def aliases(opts) do
-    entries =
+    aliases =
       case opts[:as] do
         nil -> []
         {:%{}, _, kw} -> kw
         kw -> kw
       end
 
-    Map.new(entries, fn
-      {{fun_name, fun_arity}, fun_alias} -> {{"#{fun_name}", fun_arity}, "#{fun_alias}"}
-      {fun_name, fun_alias} -> {{"#{fun_name}", :*}, "#{fun_alias}"}
-    end)
+    AliasesMap.new(aliases)
   end
 
   defp arities_map(nil), do: nil
