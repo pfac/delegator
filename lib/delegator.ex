@@ -1,5 +1,28 @@
 defmodule Delegator do
-  @moduledoc false
+  @moduledoc """
+  Delegates functions and macros from one module to another.
+
+  Delegator extends Elixir's built-in delegation mechanism by providing powerful
+  macros for delegating multiple functions and macros at once, with fine-grained
+  control over which items are delegated and how they are named.
+
+  ## Shared options
+
+  - `:as` - Rename delegated definitions. See `Delegator.AliasesMap.new/1`.
+  - `:except` - Exclude specific defintions. See `Delegator.AritiesMap.new/1`.
+  - `:only` - Include only specific defintions. See `Delegator.AritiesMap.new/1`.
+  - `:prefix` - Add prefix to delegated names. May be an atom or a string.
+  - `:suffix` - Add suffix to delegated names. May be an atom or a string.
+
+  Passing `nil` to any option causes it to be ignored.
+
+  ## Overrides
+
+  Functions delegated with `defdelegateall` are automatically marked as
+  overridable, allowing you to override them in your module.
+
+  Macros are never overridable.
+  """
 
   alias Delegator.AliasesMap
   alias Delegator.Definitions
@@ -85,10 +108,27 @@ defmodule Delegator do
     delegations ++ [overrides]
   end
 
-  defmacro defdelegateall(target, opts \\ []) do
-    quote do: Delegator.__delegateall__(:functions, unquote(target), unquote(opts))
+  @doc """
+  Defines delegating functions for all functions in a module.
+
+  See the ["Shared options"](#module-shared-options) section at the module
+  documentation for more options.
+  """
+  defmacro defdelegateall(mod, opts \\ []) do
+    quote do: Delegator.__delegateall__(:functions, unquote(mod), unquote(opts))
   end
 
+  @doc """
+  Defines a macro that delegates to another module.
+
+  Similar to `defdelegate/2` but for macros.
+
+  ## Options
+
+  * `:to` - the module to dispatch to.
+  * `:as` - the macro to call on the target given in `:to`. Optional. Defaults
+    to the name of the macro being delegated.
+  """
   defmacro defdelegatemacro({name, _, args}, opts \\ []) do
     as = Keyword.get(opts, :as, name)
 
@@ -112,10 +152,22 @@ defmodule Delegator do
     end
   end
 
+  @doc """
+  Defines delegating macros for all macros in a module.
+
+  See the ["Shared options"](#module-shared-options) section at the module
+  documentation for more options.
+  """
   defmacro defdelegateallmacros(target, opts \\ []) do
     quote do: Delegator.__delegateall__(:macros, unquote(target), unquote(opts))
   end
 
+  @doc """
+  Define delegating functions and macros for everything in a module.
+
+  See the ["Shared options"](#module-shared-options) section at the module
+  documentation for more options.
+  """
   defmacro defdelegateeverything(target, opts \\ []) do
     quote do
       defdelegateall unquote(target), unquote(opts)
@@ -123,27 +175,72 @@ defmodule Delegator do
     end
   end
 
+  @doc """
+  Build a delegation name.
+
+  Takes the original definition as a name-arity tuple. It then looks for any
+  aliases matching that definition. If no alias is found, applies a prefix
+  and/or suffix when provided.
+
+  Prefix and suffix are not applied when an alias is provided, so the alias is
+  honored as provided.
+
+  When the definition name ends with `!` or `?`, the suffix is applied right
+  before these characters.
+
+  When the definition starts with `_`, no separator is placed after the prefix.
+  When it ends with `_`, no separator is placed before the suffix.
+
+  ## Examples
+
+      iex> Delegator.delegate_name({:foo, 1}, Delegator.AliasesMap.new(foo: :bar), :pre, :post)
+      "bar"
+
+      iex> Delegator.delegate_name({:foo, 1}, Delegator.AliasesMap.new(%{{:foo, 1} => :bar}), :pre, :post)
+      "bar"
+
+      iex> Delegator.delegate_name({:foo, 1}, Delegator.AliasesMap.new(), :pre, :post)
+      "pre_foo_post"
+
+      iex> Delegator.delegate_name({:foo!, 1}, Delegator.AliasesMap.new(), :pre, :post)
+      "pre_foo_post!"
+
+      iex> Delegator.delegate_name({:__foo__, 1}, Delegator.AliasesMap.new(), :pre, :post)
+      "pre__foo__post"
+  """
   def delegate_name({name, arity}, aliases, prefix, suffix) do
     name = to_string(name)
 
     with nil <- AliasesMap.get(aliases, {name, arity}) do
-      name |> prefix_fun_name(prefix) |> suffix_fun_name(suffix)
+      name |> prefix_def_name(prefix) |> suffix_def_name(suffix)
     end
   end
 
-  defp prefix_fun_name(fun_name, prefix) do
-    cond do
-      "#{prefix}" == "" -> fun_name
-      String.starts_with?(fun_name, "_") -> prefix <> fun_name
-      true -> "#{prefix}_#{fun_name}"
-    end
+  defp prefix_def_name(name, prefix) do
+    prefix = to_string(prefix)
+
+    parts =
+      cond do
+        prefix == "" -> [name]
+        String.starts_with?(name, "_") -> [prefix, name]
+        true -> [prefix, "_", name]
+      end
+
+    Enum.join(parts)
   end
 
-  defp suffix_fun_name(fun_name, suffix) do
-    cond do
-      "#{suffix}" == "" -> fun_name
-      String.ends_with?(fun_name, "_") -> fun_name <> suffix
-      true -> "#{fun_name}_#{suffix}"
-    end
+  defp suffix_def_name(name, suffix) do
+    suffix = to_string(suffix)
+    {rest, last} = String.split_at(name, -1)
+
+    parts =
+      cond do
+        suffix == "" -> [name]
+        last == "_" -> [name, suffix]
+        last in ~w[! ?] -> [suffix_def_name(rest, suffix), last]
+        true -> [name, "_", suffix]
+      end
+
+    Enum.join(parts)
   end
 end

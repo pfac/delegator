@@ -7,7 +7,10 @@ defmodule Delegator.MixProject do
       version: "0.1.0",
       elixir: "~> 1.19",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+
+      # Docs
+      docs: &docs/0
     ]
   end
 
@@ -22,8 +25,12 @@ defmodule Delegator.MixProject do
   defp deps do
     [
       {:credo, "~> 1.0", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.0", only: :docs},
+      {:ex_doc, "~> 0.0", only: :dev},
       {:styler, "~> 1.0", only: [:dev, :test], runtime: false}
     ]
+  end
+
+  defp docs do
+    []
   end
 end

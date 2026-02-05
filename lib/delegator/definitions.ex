@@ -1,5 +1,11 @@
 defmodule Delegator.Definitions do
-  @moduledoc false
+  @moduledoc """
+  Filters function and macro definitions for delegation.
+
+  This module provides functions to filter lists of function/macro definitions
+  based on inclusion and exclusion criteria. It works with `Delegator.AritiesMap`
+  to determine which items should be included or excluded from delegation.
+  """
 
   alias Delegator.AritiesMap
 

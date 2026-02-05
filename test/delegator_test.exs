@@ -1,6 +1,8 @@
 defmodule DelegatorTest do
   use Delegator.Test.Case
 
+  doctest Delegator
+
   defmodule A do
     @moduledoc false
     def a, do: 1
