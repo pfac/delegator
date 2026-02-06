@@ -71,6 +71,10 @@ end
 See the shared options documentation for more ways to customise these
 delegations.
 
+## Acknowledgements
+
+Inspired by https://github.com/rill-project/delegate.
+
 ## License
 
 Copyright 2026 Pedro Costa
