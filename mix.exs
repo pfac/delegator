@@ -9,8 +9,22 @@ defmodule Delegator.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
 
+      # Package metadata for Hex
+      description: "Delegate functions and macros in bulk",
+      package: package(),
+
       # Docs
       docs: &docs/0
+    ]
+  end
+
+  defp package do
+    [
+      licenses: ["Apache-2.0"],
+      links: %{
+        "Codeberg" => "https://codeberg.org/pfac/delegator",
+        "Hex Docs" => "https://hexdocs.pm/delegator"
+      }
     ]
   end
 
@@ -31,6 +45,9 @@ defmodule Delegator.MixProject do
   end
 
   defp docs do
-    []
+    [
+      extras: ["README.md", "LICENSE.txt"],
+      main: "readme"
+    ]
   end
 end
