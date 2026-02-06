@@ -22,7 +22,7 @@ Add Delegator to your `mix.exs` dependencies:
 ```elixir
 def deps do
   [
-    {:delegator, "~> 0.1.0"}
+    {:delegator, "1.0.0-rc1"}
   ]
 end
 ```
