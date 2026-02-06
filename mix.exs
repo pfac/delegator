@@ -34,7 +34,7 @@ defmodule Delegator.MixProject do
 
   defp docs do
     [
-      extras: ["README.md", "LICENSE.txt"],
+      extras: ["README.md", "CHANGELOG.md", "LICENSE.txt"],
       main: "readme"
     ]
   end
@@ -43,7 +43,7 @@ defmodule Delegator.MixProject do
     [
       licenses: ["Apache-2.0"],
       links: %{"Codeberg" => "https://codeberg.org/pfac/delegator"},
-      files: ~w[lib mix.exs README.md LICENSE.txt]
+      files: ~w[lib mix.exs README.md CHANGELOG.md LICENSE.txt]
     ]
   end
 end
