@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0-rc1
+## 0.1.0
 
 - Initial release
   - Adds `Delegator.defdelegateall/2`;

@@ -4,7 +4,7 @@ defmodule Delegator.MixProject do
   def project do
     [
       app: :delegator,
-      version: "1.0.0-rc1",
+      version: "0.1.0",
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -46,7 +46,7 @@ defmodule Delegator.MixProject do
         "Codeberg" => "https://codeberg.org/pfac/delegator",
         "GitHub" => "https://github.com/pfac/delegator"
       },
-      files: ~w[lib mix.exs README.md CHANGELOG.md LICENSE.txt]
+      files: ~w[lib .formatter.exs mix.exs README.md CHANGELOG.md LICENSE.txt]
     ]
   end
 end

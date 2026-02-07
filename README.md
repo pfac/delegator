@@ -24,7 +24,7 @@ Add Delegator to your `mix.exs` dependencies:
 ```elixir
 def deps do
   [
-    {:delegator, "1.0.0-rc1"}
+    {:delegator, "0.1.0"}
   ]
 end
 ```
@@ -75,7 +75,7 @@ delegations.
 
 ## Acknowledgements
 
-Inspired by https://github.com/rill-project/delegate.
+Inspired by [delegate](https://github.com/rill-project/delegate).
 
 ## License
 
