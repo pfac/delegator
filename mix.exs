@@ -42,7 +42,10 @@ defmodule Delegator.MixProject do
   defp package do
     [
       licenses: ["Apache-2.0"],
-      links: %{"Codeberg" => "https://codeberg.org/pfac/delegator"},
+      links: %{
+        "Codeberg" => "https://codeberg.org/pfac/delegator",
+        "GitHub" => "https://github.com/pfac/delegator"
+      },
       files: ~w[lib mix.exs README.md CHANGELOG.md LICENSE.txt]
     ]
   end
