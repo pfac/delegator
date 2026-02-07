@@ -1,5 +1,7 @@
 # Delegator
 
+[![build](https://github.com/pfac/delegator/actions/workflows/build.yml/badge.svg)](https://github.com/pfac/delegator/actions/workflows/build.yml)
+
 Delegate functions and macros in bulk.
 
 Delegator extends Elixir's built-in delegation mechanism with powerful options
