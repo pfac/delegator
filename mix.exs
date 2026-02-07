@@ -5,7 +5,7 @@ defmodule Delegator.MixProject do
     [
       app: :delegator,
       version: "1.0.0-rc1",
-      elixir: "~> 1.19",
+      elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       source_url: "https://codeberg.org/pfac/delegator",
