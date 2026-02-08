@@ -81,7 +81,7 @@ defmodule DelegatorTest do
       @moduledoc false
       import Delegator
 
-      defdelegateall to: A, as: [a: :c]
+      defdelegateall to: A, as: [c: :a]
       defdelegateall to: A, except: [a: 0]
       defdelegateall to: B, only: [b: 0]
       defdelegateall to: B, prefix: :before
@@ -175,7 +175,7 @@ defmodule DelegatorTest do
       @moduledoc false
       import Delegator
 
-      defdelegateallmacros to: A, as: [m: :o]
+      defdelegateallmacros to: A, as: [o: :m]
       defdelegateallmacros to: A, except: [m: 1]
       defdelegateallmacros to: B, only: [n: 1]
       defdelegateallmacros to: B, prefix: :before
@@ -262,7 +262,7 @@ defmodule DelegatorTest do
       @moduledoc false
       import Delegator
 
-      defdelegateeverything to: A, as: [a: :c, m: :o]
+      defdelegateeverything to: A, as: [c: :a, o: :m]
       defdelegateeverything to: A, except: [a: 0, m: 1]
       defdelegateeverything to: B, only: [b: 0, n: 1]
     end

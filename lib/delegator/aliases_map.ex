@@ -26,12 +26,41 @@ defmodule Delegator.AliasesMap do
 
   Names and aliases may be strings or atoms. Internally both are stored as
   strings.
+
+  ## Examples
+
+      iex> Delegator.AliasesMap.new()
+      #Delegator.AliasesMap<aliases: %{}>
+
+      iex> Delegator.AliasesMap.new([])
+      #Delegator.AliasesMap<aliases: %{}>
+
+      iex> Delegator.AliasesMap.new([a: :c])
+      #Delegator.AliasesMap<aliases: %{{"c", :*} => "a"}>
+
+      iex> Delegator.AliasesMap.new(%{{:a, 1} => :c})
+      #Delegator.AliasesMap<aliases: %{{"c", 1} => "a"}>
+
+      iex> Delegator.AliasesMap.new(%{[a: 1, a: 2] => :c})
+      #Delegator.AliasesMap<aliases: %{{"c", 1} => "a", {"c", 2} => "a"}>
   """
   def new(enumerable \\ []) do
     aliases =
-      Map.new(enumerable, fn
-        {{fun_name, fun_arity}, fun_alias} -> {{"#{fun_name}", fun_arity}, "#{fun_alias}"}
-        {fun_name, fun_alias} -> {{"#{fun_name}", :*}, "#{fun_alias}"}
+      Enum.reduce(enumerable, %{}, fn
+        # %{[a: 1, a: 2, ...] => :c}
+        {defs, to}, acc when is_list(defs) ->
+          Enum.reduce(defs, acc, fn {from, arity}, acc2 ->
+            Map.put(acc2, {"#{to}", arity}, "#{from}")
+          end)
+
+        # %{{:a, 1} => :c}
+        {{from, arity}, to}, acc ->
+          Map.put(acc, {"#{to}", arity}, "#{from}")
+
+        # %{a: :c}
+        # [a: :c]
+        {from, to}, acc ->
+          Map.put(acc, {"#{to}", :*}, "#{from}")
       end)
 
     %__MODULE__{aliases: aliases}

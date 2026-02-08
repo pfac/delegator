@@ -4,6 +4,7 @@
 
 - Remove `use` functionality.
 - Always use `:to` option to set the target module.
+- Invert `:as` definition to match `defdelegate`.
 
 ## 0.1.0
 

@@ -174,10 +174,10 @@ defmodule Delegator do
 
   ## Examples
 
-      iex> Delegator.delegate_name({:foo, 1}, Delegator.AliasesMap.new(foo: :bar), :pre, :post)
+      iex> Delegator.delegate_name({:foo, 1}, Delegator.AliasesMap.new(bar: :foo), :pre, :post)
       "bar"
 
-      iex> Delegator.delegate_name({:foo, 1}, Delegator.AliasesMap.new(%{{:foo, 1} => :bar}), :pre, :post)
+      iex> Delegator.delegate_name({:foo, 1}, Delegator.AliasesMap.new(%{{:bar, 1} => :foo}), :pre, :post)
       "bar"
 
       iex> Delegator.delegate_name({:foo, 1}, Delegator.AliasesMap.new(), :pre, :post)

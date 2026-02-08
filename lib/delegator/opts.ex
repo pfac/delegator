@@ -21,19 +21,19 @@ defmodule Delegator.Opts do
   ## Examples
 
       iex> Delegator.Opts.aliases(as: %{a: :c})
-      #Delegator.AliasesMap<aliases: %{{"a", :*} => "c"}>
+      #Delegator.AliasesMap<aliases: %{{"c", :*} => "a"}>
 
       iex> Delegator.Opts.aliases(as: [a: "c"])
-      #Delegator.AliasesMap<aliases: %{{"a", :*} => "c"}>
+      #Delegator.AliasesMap<aliases: %{{"c", :*} => "a"}>
 
       iex> Delegator.Opts.aliases(as: %{"a" => "c"})
-      #Delegator.AliasesMap<aliases: %{{"a", :*} => "c"}>
+      #Delegator.AliasesMap<aliases: %{{"c", :*} => "a"}>
 
       iex> Delegator.Opts.aliases(as: %{{:a, 1} => :c})
-      #Delegator.AliasesMap<aliases: %{{"a", 1} => "c"}>
+      #Delegator.AliasesMap<aliases: %{{"c", 1} => "a"}>
 
       iex> Delegator.Opts.aliases(as: [{{:a, 1}, :c}])
-      #Delegator.AliasesMap<aliases: %{{"a", 1} => "c"}>
+      #Delegator.AliasesMap<aliases: %{{"c", 1} => "a"}>
   """
   def aliases(opts) do
     aliases =
