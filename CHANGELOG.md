@@ -1,5 +1,10 @@
 # Changelog
 
+## Upcoming
+
+- Remove `use` functionality.
+- Always use `:to` option to set the target module.
+
 ## 0.1.0
 
 - Initial release

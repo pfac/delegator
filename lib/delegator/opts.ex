@@ -116,4 +116,23 @@ defmodule Delegator.Opts do
       "after"
   """
   def suffix(opts), do: opts |> Keyword.get(:suffix) |> to_string()
+
+  @doc """
+  Extract the module to delegate to.
+
+  Raises an `ArgumentError` if not set or set to `nil`.
+
+  ## Examples
+
+      iex> Delegator.Opts.to!(to: A)
+      A
+
+      iex> Delegator.Opts.to!(to: nil)
+      ** (ArgumentError) :to is required
+  """
+  def to!(opts) do
+    with nil <- Keyword.get(opts, :to) do
+      raise ArgumentError, ":to is required"
+    end
+  end
 end

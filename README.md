@@ -24,7 +24,7 @@ Add Delegator to your `mix.exs` dependencies:
 ```elixir
 def deps do
   [
-    {:delegator, "0.1.0"}
+    {:delegator, "0.2.0"}
   ]
 end
 ```
@@ -33,22 +33,7 @@ Then run `mix deps.get`.
 
 ## Usage
 
-The simplest way to delegate everything from some modules is to `use` Decorator:
-
-```elixir
-defmodule MyModule do
-  use Delegator, to: A
-  use Delegator, to: [B, C]
-end
-```
-
-This creates delegations in `MyModule` for all functions and macros defined by
-`TargetModule`.
-
-### More flexibility
-
-If you need more flexibility, such as only delegate a module's functions but
-not its macros, you can instead:
+Use `Delegator`'s macros to delegate a module's functions and macros.
 
 ```elixir
 defmodule MyModule do
@@ -58,20 +43,18 @@ defmodule MyModule do
   defdelegatemacro m(x, y, z), to: TargetModule
   
   # Delegate all functions/macros
-  defdelegateall FunctionsModule
-  defdelegateallmacros MacrosModule
+  defdelegateall to: FunctionsModule
+  defdelegateallmacros to: MacrosModule
   
   # Delegate everything (similar to use Delegator with a single module)
-  defdelegateeverything SuperModule
-  
-  # Delegate everything, to one or multiple modules
-  use Delegator, to: A
-  use Delegator, to: [B, C]
+  defdelegateeverything to: SuperModule
 end
 ```
 
-See the shared options documentation for more ways to customise these
+See the [shared options] documentation for more ways to customise these
 delegations.
+
+[shared options]: https://hexdocs.pm/delegator/Delegator.html#module-shared-options
 
 ## Acknowledgements
 

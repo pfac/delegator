@@ -13,6 +13,7 @@ defmodule Delegator do
   - `:only` - Include only specific defintions. See `Delegator.AritiesMap.new/1`.
   - `:prefix` - Add prefix to delegated names. May be an atom or a string.
   - `:suffix` - Add suffix to delegated names. May be an atom or a string.
+  - `:to` - Required. Which module to delegate to.
 
   Passing `nil` to any option causes it to be ignored.
 
@@ -28,37 +29,17 @@ defmodule Delegator do
   alias Delegator.Definitions
   alias Delegator.Opts
 
-  defmacro __using__(opts) do
-    header =
-      quote do
-        import unquote(__MODULE__)
-      end
-
-    targets =
-      case Keyword.fetch!(opts, :to) do
-        nil -> raise ArgumentError, ":to is required"
-        [] -> raise ArgumentError, ":to must not be empty"
-        [_ | _] = targets -> targets
-        {_, _, _} = target -> [target]
-      end
-
-    delegates =
-      for target <- targets do
-        quote do: defdelegateeverything(unquote(target), unquote(opts))
-      end
-
-    [header | delegates]
-  end
-
-  defmacro __delegateall__(type, target, opts \\ []) do
+  @doc false
+  defmacro __delegateall__(type, opts \\ []) do
     aliases = Opts.aliases(opts)
     except = Opts.except(opts)
     only = Opts.only(opts)
     prefix = Opts.prefix(opts)
     suffix = Opts.suffix(opts)
+    to = Opts.to!(opts)
 
     definitions =
-      target
+      to
       |> Macro.expand(__CALLER__)
       |> Kernel.apply(:__info__, [type])
       |> then(&if is_nil(except), do: &1, else: Definitions.except(&1, except))
@@ -90,7 +71,7 @@ defmodule Delegator do
           quote do
             unquote(delegate_mod).unquote(delegate_macro)(
               unquote(delegate_name)(unquote_splicing(args)),
-              to: unquote(target),
+              to: unquote(to),
               as: unquote(name)
             )
           end
@@ -114,8 +95,31 @@ defmodule Delegator do
   See the ["Shared options"](#module-shared-options) section at the module
   documentation for more options.
   """
-  defmacro defdelegateall(mod, opts \\ []) do
-    quote do: Delegator.__delegateall__(:functions, unquote(mod), unquote(opts))
+  defmacro defdelegateall(opts \\ []) do
+    quote do: Delegator.__delegateall__(:functions, unquote(opts))
+  end
+
+  @doc """
+  Defines delegating macros for all macros in a module.
+
+  See the ["Shared options"](#module-shared-options) section at the module
+  documentation for more options.
+  """
+  defmacro defdelegateallmacros(opts \\ []) do
+    quote do: Delegator.__delegateall__(:macros, unquote(opts))
+  end
+
+  @doc """
+  Define delegating functions and macros for everything in a module.
+
+  See the ["Shared options"](#module-shared-options) section at the module
+  documentation for more options.
+  """
+  defmacro defdelegateeverything(opts \\ []) do
+    quote do
+      defdelegateall unquote(opts)
+      defdelegateallmacros unquote(opts)
+    end
   end
 
   @doc """
@@ -125,7 +129,7 @@ defmodule Delegator do
 
   ## Options
 
-  * `:to` - the module to dispatch to.
+  * `:to` - the module to dispatch to. Required.
   * `:as` - the macro to call on the target given in `:to`. Optional. Defaults
     to the name of the macro being delegated.
   """
@@ -149,29 +153,6 @@ defmodule Delegator do
           unquote(to).unquote(as)(unquote_splicing(args))
         end
       end
-    end
-  end
-
-  @doc """
-  Defines delegating macros for all macros in a module.
-
-  See the ["Shared options"](#module-shared-options) section at the module
-  documentation for more options.
-  """
-  defmacro defdelegateallmacros(target, opts \\ []) do
-    quote do: Delegator.__delegateall__(:macros, unquote(target), unquote(opts))
-  end
-
-  @doc """
-  Define delegating functions and macros for everything in a module.
-
-  See the ["Shared options"](#module-shared-options) section at the module
-  documentation for more options.
-  """
-  defmacro defdelegateeverything(target, opts \\ []) do
-    quote do
-      defdelegateall unquote(target), unquote(opts)
-      defdelegateallmacros unquote(target), unquote(opts)
     end
   end
 
